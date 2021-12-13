@@ -33,4 +33,4 @@ jobs:
       }
     displayName: unlist packages
     env:
-      NUGET_CLI_API_KEY: $(pat--nuget--xamarinc--push--wildcard)
+      NUGET_CLI_API_KEY: $(pat--nuget--xamarinc--unlist--wildcard)
