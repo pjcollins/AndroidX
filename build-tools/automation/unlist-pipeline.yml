@@ -1,0 +1,36 @@
+# Manually triggered pipeline used to unlist packages on nuget.org
+
+trigger:
+- none
+
+pr:
+- none
+
+variables:
+- group: Xamarin-Secrets
+
+jobs:
+- job: unlist_nupkg
+  displayName: Unlist Packages
+  timeoutInMinutes: 90
+  pool:
+    vmImage: windows-2022
+  workspace:
+    clean: all
+  steps:
+  - checkout: self
+  - task: NuGetToolInstaller@1
+    inputs:
+      versionSpec: 5.x
+  - pwsh: |
+      $unlistFile = "$(Build.SourcesDirectory)\build-tools\automation\unlist.txt"
+      foreach ($line in Get-Content $unlistFile) {
+          $nupkgParts = $line.Split(" ",[System.StringSplitOptions]::RemoveEmptyEntries)
+          $id = $nupkgParts[0]
+          $version = $nupkgParts[1]
+          Write-Host "Attempting to unlist package $id    $version."
+          & nuget delete $id $version -apikey $env:NUGET_CLI_API_KEY
+      }
+    displayName: unlist packages
+    env:
+      NUGET_CLI_API_KEY: $(pat--nuget--xamarinc--push--wildcard)
