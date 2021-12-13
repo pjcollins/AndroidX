@@ -29,7 +29,7 @@ jobs:
           $id = $nupkgParts[0]
           $version = $nupkgParts[1]
           Write-Host "Attempting to unlist package $id    $version."
-          & nuget delete $id $version -Source https://api.nuget.org/v3/index.json -apikey $env:NUGET_CLI_API_KEY -Verbosity detailed
+          & nuget delete $id $version -Source https://api.nuget.org/v3/index.json -apikey $env:NUGET_CLI_API_KEY -NoPrompt -Verbosity detailed
       }
     displayName: unlist packages
     env:
