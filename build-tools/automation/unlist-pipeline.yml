@@ -32,5 +32,25 @@ jobs:
           & nuget delete $id $version -Source https://api.nuget.org/v3/index.json -apikey $env:NUGET_CLI_API_KEY -NoPrompt -Verbosity detailed
       }
     displayName: unlist packages
+    condition: false
+    env:
+      NUGET_CLI_API_KEY: $(pat--nuget--xamarinc--unlist--wildcard)
+  - pwsh: |
+      $unlistFile = "$(Build.SourcesDirectory)\build-tools\automation\unlist.txt"
+      foreach ($line in Get-Content $unlistFile) {
+          $nupkgParts = $line.Split(" ",[System.StringSplitOptions]::RemoveEmptyEntries)
+          $id = $nupkgParts[0]
+          $version = $nupkgParts[1]
+          Write-Host "Attempting to relist package $id    $version."
+          $headers = @{ "X-NuGet-ApiKey"="$env:NUGET_CLI_API_KEY" }
+          $uri = "https://www.nuget.org/api/v2/package/$id/$version"
+          try {
+              $response = Invoke-WebRequest -Headers $headers -Uri $uri -Method "Post"
+              Write-Host "Status Code: $($response.StatusCode)"
+          } catch {
+              Write-Host "Exception: $($_.Exception)"
+          }
+      }
+    displayName: relist packages
     env:
       NUGET_CLI_API_KEY: $(pat--nuget--xamarinc--unlist--wildcard)
