@@ -50,3 +50,19 @@ jobs:
 
   - pwsh: Get-ChildItem -Name -Recurse -Path $(Build.StagingDirectory)
     displayName: list downloaded artifacts
+
+  - task: NuGetCommand@2
+    displayName: push nupkgs
+    inputs:
+      command: push
+      packagesToPush: $(Build.StagingDirectory)\nuget-signed\*.nupkg
+      nuGetFeedType: external
+      publishFeedCredentials: Xamarin nuget.org - xamarinc
+
+  - task: NuGetCommand@2
+    displayName: push msi nupkgs
+    inputs:
+      command: push
+      packagesToPush: $(Build.StagingDirectory)\vs-msi-nugets\*.nupkg
+      nuGetFeedType: external
+      publishFeedCredentials: Xamarin nuget.org - xamarinc
