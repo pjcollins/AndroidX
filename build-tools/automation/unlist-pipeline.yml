@@ -10,47 +10,43 @@ variables:
 - group: Xamarin-Secrets
 
 jobs:
-- job: unlist_nupkg
-  displayName: Unlist Packages
+- job: push_nupkg
+  displayName: Push Packages
   timeoutInMinutes: 90
   pool:
-    vmImage: windows-2022
+    name: AzurePipelines-EO
+    demands:
+    - ImageOverride -equals AzurePipelinesWindows2022compliant
   workspace:
     clean: all
   steps:
   - checkout: self
+
   - task: NuGetToolInstaller@1
     inputs:
       versionSpec: 5.x
-  - pwsh: |
-      $unlistFile = "$(Build.SourcesDirectory)\build-tools\automation\unlist.txt"
-      foreach ($line in Get-Content $unlistFile) {
-          $nupkgParts = $line.Split(" ",[System.StringSplitOptions]::RemoveEmptyEntries)
-          $id = $nupkgParts[0]
-          $version = $nupkgParts[1]
-          Write-Host "Attempting to unlist package $id    $version."
-          & nuget delete $id $version -Source https://api.nuget.org/v3/index.json -apikey $env:NUGET_CLI_API_KEY -NoPrompt -Verbosity detailed
-      }
-    displayName: unlist packages
-    condition: false
-    env:
-      NUGET_CLI_API_KEY: $(pat--nuget--xamarinc--unlist--wildcard)
-  - pwsh: |
-      $unlistFile = "$(Build.SourcesDirectory)\build-tools\automation\unlist.txt"
-      foreach ($line in Get-Content $unlistFile) {
-          $nupkgParts = $line.Split(" ",[System.StringSplitOptions]::RemoveEmptyEntries)
-          $id = $nupkgParts[0]
-          $version = $nupkgParts[1]
-          Write-Host "Attempting to relist package $id    $version."
-          $headers = @{ "X-NuGet-ApiKey"="$env:NUGET_CLI_API_KEY" }
-          $uri = "https://www.nuget.org/api/v2/package/$id/$version"
-          try {
-              $response = Invoke-WebRequest -Headers $headers -Uri $uri -Method "Post"
-              Write-Host "Status Code: $($response.StatusCode)"
-          } catch {
-              Write-Host "Exception: $($_.Exception)"
-          }
-      }
-    displayName: relist packages
-    env:
-      NUGET_CLI_API_KEY: $(pat--nuget--xamarinc--unlist--wildcard)
+
+  - task: DownloadPipelineArtifact@2
+    displayName: download nuget-signed
+    inputs:
+      source: specific
+      project: DevDiv
+      pipeline: 14411
+      runVersion: specific
+      runId: 5862144
+      artifactName: nuget-signed
+      downloadPath: $(Build.StagingDirectory)\nuget-signed
+
+  - task: DownloadPipelineArtifact@2
+    displayName: download vs-msi-nugets
+    inputs:
+      source: specific
+      project: DevDiv
+      pipeline: 14411
+      runVersion: specific
+      runId: 5862144
+      artifactName: vs-msi-nugets
+      downloadPath: $(Build.StagingDirectory)\vs-msi-nugets
+
+  - pwsh: Get-ChildItem -Name -Recurse -Path $(Build.StagingDirectory)
+    displayName: list downloaded artifacts
