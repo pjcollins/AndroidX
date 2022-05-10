@@ -29,7 +29,8 @@ jobs:
   workspace:
     clean: all
   steps:
-  - checkout: self
+  - checkout: sdk-insertions
+    clean: true
 
   - task: NuGetToolInstaller@1
     inputs:
