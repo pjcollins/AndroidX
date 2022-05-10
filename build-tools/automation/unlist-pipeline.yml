@@ -9,10 +9,10 @@ pr:
 resources:
   repositories:
   - repository: sdk-insertions
-      type: github
-      name: xamarin/sdk-insertions
-      ref: refs/heads/main
-      endpoint: xamarin
+    type: github
+    name: xamarin/sdk-insertions
+    ref: refs/heads/main
+    endpoint: xamarin
 
 variables:
 - template: templates/common/vs-release-vars.yml@sdk-insertions
