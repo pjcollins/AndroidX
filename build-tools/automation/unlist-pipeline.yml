@@ -46,7 +46,7 @@ jobs:
       projectOrg: xamarin
       artifactName: $(NupkgCommitStatusName)
       githubToken: $(github--pat--vs-mobiletools-engineering-service2)
-      downloadFolder: $(Build.StagingDirectory)
+      downloadFolder: $(Build.StagingDirectory)\nupkgs
 
   - pwsh: Get-ChildItem -Name -Recurse -Path $(Build.StagingDirectory)
     displayName: list downloaded artifacts
