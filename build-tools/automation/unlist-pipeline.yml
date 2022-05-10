@@ -35,9 +35,9 @@ jobs:
     inputs:
       versionSpec: 5.x
 
-    - script: |
-        echo ##vso[task.setvariable variable=COMMIT]8fcb97a072c10248ae01b52b60696b8e9e6c7a99
-      displayName: set COMMIT
+  - script: |
+      echo ##vso[task.setvariable variable=COMMIT]8fcb97a072c10248ae01b52b60696b8e9e6c7a99
+    displayName: set COMMIT
 
   - template: templates/common/download_artifacts.yml@sdk-insertions
     parameters:
