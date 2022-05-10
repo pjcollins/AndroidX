@@ -6,7 +6,16 @@ trigger:
 pr:
 - none
 
+resources:
+  repositories:
+  - repository: sdk-insertions
+      type: github
+      name: xamarin/sdk-insertions
+      ref: refs/heads/main
+      endpoint: xamarin
+
 variables:
+- template: templates/common/vs-release-vars.yml@sdk-insertions
 - group: Xamarin-Secrets
 
 jobs:
@@ -26,43 +35,33 @@ jobs:
     inputs:
       versionSpec: 5.x
 
-  - task: DownloadPipelineArtifact@2
-    displayName: download nuget-signed
-    inputs:
-      source: specific
-      project: DevDiv
-      pipeline: 14411
-      runVersion: specific
-      runId: 5862144
-      artifactName: nuget-signed
-      downloadPath: $(Build.StagingDirectory)\nuget-signed
+    - script: |
+        echo ##vso[task.setvariable variable=COMMIT]8fcb97a072c10248ae01b52b60696b8e9e6c7a99
+      displayName: set COMMIT
 
-  - task: DownloadPipelineArtifact@2
-    displayName: download vs-msi-nugets
-    inputs:
-      source: specific
-      project: DevDiv
-      pipeline: 14411
-      runVersion: specific
-      runId: 5862144
-      artifactName: vs-msi-nugets
-      downloadPath: $(Build.StagingDirectory)\vs-msi-nugets
+  - template: templates/common/download_artifacts.yml@sdk-insertions
+    parameters:
+      projectName: xamarin
+      projectOrg: xamarin-macios
+      artifactName: $(NupkgCommitStatusName)
+      githubToken: $(github--pat--vs-mobiletools-engineering-service2)
+      downloadFolder: $(Build.StagingDirectory)
 
   - pwsh: Get-ChildItem -Name -Recurse -Path $(Build.StagingDirectory)
     displayName: list downloaded artifacts
 
-  - task: NuGetCommand@2
-    displayName: push nupkgs
-    inputs:
-      command: push
-      packagesToPush: $(Build.StagingDirectory)\nuget-signed\*.nupkg
-      nuGetFeedType: external
-      publishFeedCredentials: Xamarin nuget.org - xamarinc
+#  - task: NuGetCommand@2
+#    displayName: push nupkgs
+#    inputs:
+#      command: push
+#      packagesToPush: $(Build.StagingDirectory)\nuget-signed\*.nupkg
+#      nuGetFeedType: external
+#      publishFeedCredentials: Xamarin nuget.org - xamarinc
 
-  - task: NuGetCommand@2
-    displayName: push msi nupkgs
-    inputs:
-      command: push
-      packagesToPush: $(Build.StagingDirectory)\vs-msi-nugets\*.nupkg
-      nuGetFeedType: external
-      publishFeedCredentials: Xamarin nuget.org - xamarinc
+#  - task: NuGetCommand@2
+#    displayName: push msi nupkgs
+#    inputs:
+#      command: push
+#      packagesToPush: $(Build.StagingDirectory)\vs-msi-nugets\*.nupkg
+#      nuGetFeedType: external
+#      publishFeedCredentials: Xamarin nuget.org - xamarinc
