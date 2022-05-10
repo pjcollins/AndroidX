@@ -42,8 +42,8 @@ jobs:
 
   - template: templates/common/download_artifacts.yml@sdk-insertions
     parameters:
-      projectName: xamarin
-      projectOrg: xamarin-macios
+      projectName: xamarin-macios
+      projectOrg: xamarin
       artifactName: $(NupkgCommitStatusName)
       githubToken: $(github--pat--vs-mobiletools-engineering-service2)
       downloadFolder: $(Build.StagingDirectory)
